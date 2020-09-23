@@ -1,7 +1,8 @@
 # -*- coding:cp437 -*-
 
 # TRANSAIR 
-# 0.03 (FT - 08/2019)
+# 0.04 (FT - 2020)
+# Python 3
 
 # Send a DSK file directly (by WIFI) to a TOSHIBA FlashAIR inside a Floppy EMU, an UNISDISK Air or another device (to test)
 # REQUIREMENTS:
@@ -23,7 +24,7 @@ import requests
 import os.path
 import time
 
-APPNAME = "flashair"
+APPNAME = "192.168.76.43"
 
 def GenString(string):
 
@@ -39,32 +40,32 @@ def main():
     else:
         nameDSK = sys.argv[1]
 
-    print "Send {} to Flashair =>".format(nameDSK)
+    print("Send {} to Flashair =>".format(nameDSK))
     
     #### unmount ancien fichier DISK 1
-    print "  UnMount OLD File:",
+    print("  UnMount OLD File:", end='')
     url = "http://"+APPNAME+"/command.cgi?op=131&ADDR=0&LEN=2&DATA=U0"
     # get url
     r = requests.get(url)
     if (r.status_code == 200):
-        print "OK"
+        print("OK")
     else:
-        print r.status_code
+        print(r.status_code)
 
     #### delete ancien fichier
-    print "  Delete OLD File:",
+    print("  Delete OLD File:", end='')
     url = "http://"+APPNAME+"/upload.cgi?DEL="+nameDSK
     #print url
     r = requests.get(url)
     if (r.status_code == 200):
-        print "OK"
+        print("OK")
     else:
-        print r.status_code
+        print(r.status_code)
 
     #### upload nouveau fichier
     
     ## set TIME
-    print "  Set Time for NEW File:",
+    print("  Set Time for NEW File:", end='')
     # get time of the new file
     t = time.localtime(os.path.getmtime(nameDSK))
     year = (t[0] - 1980) << 9
@@ -72,30 +73,30 @@ def main():
     date = t[2]
     hours = t[3] << 11
     minites = t[4] << 5
-    seconds = t[5] / 2
+    seconds = t[5] // 2
     Time = "0x{:04X}{:04X}".format((year + month + date), (hours + minites + seconds))
     # "get" Time,
     url = "http://"+APPNAME+"/upload.cgi?FTIME="+Time
     r = requests.get(url)
     if (r.status_code == 200):
-        print "OK"
+        print("OK")
     else:
-        print r.status_code
+        print(r.status_code)
     
     ## send file 
-    print "  Upload NEW File:",
+    print("  Upload NEW File:", end='')
     url = "http://"+APPNAME+"/upload.cgi"
     files = {'file':(nameDSK, open(nameDSK,'rb'))}
     # "post" url
     r = requests.post(url, files= files)
     if (r.status_code == 200):
-        print "OK"
+        print("OK")
     else:
-        print r.status_code
+        print(r.status_code)
     
     #### mount nouveau fichier
         
-    print "  Mount NEW File:",
+    print("  Mount NEW File:", end='')
     # UTF-16 for string "/(nameDSK)"+00
     string = "/"+nameDSK
     uni = GenString(string)+"0000"
@@ -108,9 +109,9 @@ def main():
     # "get" url
     r = requests.get(url)
     if (r.status_code == 200):
-        print "OK"
+        print("OK")
     else:
-        print r.status_code
+        print(r.status_code)
         
     return
 
